@@ -1,20 +1,28 @@
 # Kynye Academy API
 
 ## Description
-This is the backend API for Kynye Academy, built with Django REST Framework.
+Backend API for Kynye Academy, built with Django REST Framework, featuring a custom user model, hierarchical expertise, JWT/Djoser/social authentication, and robust test-driven development.
 
 ## Features
-- JWT Authentication
-- API Documentation with Swagger/ReDoc
+- Custom user model (email login, instructor/student types)
+- JWT Authentication (SimpleJWT) & Djoser endpoints
+- Social authentication (Google, Facebook, etc.)
+- Hierarchical expertise structure (MainExpertise > Category > Specialization > Course)
+- Instructor and student profiles with permissions
+- Courses app with full CRUD and filtering
+- API Documentation (Swagger/ReDoc)
 - CORS support
 - Environment variables configuration
 - Production-ready settings
 - Static files served with WhiteNoise
+- PostgreSQL (with SQLite fallback for local/testing)
+- Robust tests (pytest, factory_boy)
+- GitHub Actions CI/CD with coverage reporting
 
 ## Requirements
 - Python 3.11+
 - Django 5.2+
-- PostgreSQL (optional, can use SQLite for development)
+- PostgreSQL (optional, SQLite for development/testing)
 
 ## Installation
 
@@ -60,54 +68,134 @@ python manage.py runserver
 - ReDoc: http://localhost:8000/redoc/
 
 ## Authentication
-The API uses JWT (JSON Web Token) authentication. To get a token:
+- JWT via Djoser: `/auth/jwt/create/`, `/auth/jwt/refresh/`, `/auth/users/`
+- Social auth: `/auth/o/google-oauth2/`, `/auth/o/facebook/`, etc.
 
+## Main Endpoints
+- `/profiles/` — Instructor and student profiles
+- `/courses/` — Courses CRUD, filtering by expertise/category/specialization
+
+## Usage Examples
+
+### Authentication
+#### Obtain JWT Token
 ```bash
-curl -X POST http://localhost:8000/api/auth/token/ -d "username=admin&password=password"
+POST /auth/jwt/create/
+{
+  "email": "user@example.com",
+  "password": "yourpassword"
+}
 ```
+Response:
+```json
+{
+  "access": "<jwt-access-token>",
+  "refresh": "<jwt-refresh-token>"
+}
+```
+
+#### Social Auth Example (Google)
+```bash
+POST /auth/o/google-oauth2/?state=...&code=...
+```
+
+### Profiles
+#### Get Current User Profile
+```bash
+GET /profiles/me/
+Authorization: JWT <access-token>
+```
+
+#### Update Profile
+```bash
+PATCH /profiles/me/
+{
+  "bio": "Updated bio"
+}
+```
+
+### Courses
+#### List Courses
+```bash
+GET /courses/
+```
+
+#### Filter by Main Expertise
+```bash
+GET /courses/?main_expertise=Web Development
+```
+
+#### Create Course (Instructor Only)
+```bash
+POST /courses/
+Authorization: JWT <access-token>
+{
+  "title": "New Course",
+  "description": "A test course",
+  "specialization": 1
+}
+```
+
+#### Retrieve Course
+```bash
+GET /courses/1/
+```
+
+## API Endpoints Overview
+
+| Endpoint                | Methods | Description                                 |
+|------------------------|---------|---------------------------------------------|
+| /auth/                 | POST    | Djoser auth (register, login, reset, etc.)  |
+| /auth/jwt/create/      | POST    | Obtain JWT token                            |
+| /auth/jwt/refresh/     | POST    | Refresh JWT token                           |
+| /auth/o/<provider>/    | POST    | Social auth (Google, Facebook, etc.)        |
+| /profiles/             | GET     | List all profiles (admin/instructor only)   |
+| /profiles/me/          | GET     | Get current user's profile                  |
+| /profiles/me/          | PATCH   | Update current user's profile               |
+| /courses/              | GET     | List all courses                            |
+| /courses/              | POST    | Create a new course (instructor only)       |
+| /courses/<id>/         | GET     | Retrieve a course by ID                     |
+| /courses/<id>/         | PATCH   | Update a course (instructor only)           |
+| /courses/<id>/         | DELETE  | Delete a course (instructor only)           |
 
 ## Project Structure
 ```
 kynye_academy_api/
-├── apps/               # Django applications
-├── core/              # Project configuration
-├── static/            # Static files
-├── media/             # User uploaded files
-├── templates/         # HTML templates
-├── .env              # Environment variables
-├── .gitignore        # Git ignore rules
-├── manage.py         # Django's command-line utility
-└── requirements.txt  # Project dependencies
+├── apps/
+│   ├── accounts/        # Custom user model, registration, auth
+│   ├── profiles/        # Instructor/Student profiles, signals, permissions
+│   └── courses/         # Hierarchical expertise, categories, courses
+├── core/                # Project configuration, settings, urls
+├── static/              # Static files
+├── media/               # User uploaded files
+├── templates/           # HTML templates
+├── .env                 # Environment variables
+├── .github/workflows/   # GitHub Actions CI/CD
+├── manage.py            # Django's command-line utility
+└── requirements.txt     # Project dependencies
 ```
 
-## Development
-1. Create a new app
-```bash
-python manage.py startapp app_name
-```
-
-2. Register the app in `INSTALLED_APPS`
-3. Create models
-4. Create serializers
-5. Create views
-6. Add URLs
-
-## Testing
+## Testing & TDD
+- All new features are developed with tests first (pytest, factory_boy)
+- Run tests:  
 ```bash
 pytest
 ```
+- Coverage is reported in CI and locally (see GitHub Actions)
 
 ## Code Quality
 ```bash
 # Format code
 black .
-
 # Sort imports
 isort .
-
 # Lint code
 flake8
 ```
+
+## CI/CD
+- Automated tests and coverage via GitHub Actions (`.github/workflows/ci.yml`)
+- PRs and pushes are checked for passing tests and minimum coverage
 
 ## Deployment
 1. Update .env with production settings
