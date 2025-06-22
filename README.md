@@ -214,3 +214,37 @@ gunicorn core.wsgi:application
 
 ## License
 This project is licensed under the terms of the MIT license.
+
+## Social Authentication Setup
+This project supports login via Google, Facebook, GitHub, Twitter, and LinkedIn using [social-auth-app-django](https://python-social-auth.readthedocs.io/en/latest/).
+
+### Environment Variables
+Add the following to your `.env` file with your provider credentials:
+```
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=your-google-client-id
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=your-google-client-secret
+SOCIAL_AUTH_FACEBOOK_KEY=your-facebook-app-id
+SOCIAL_AUTH_FACEBOOK_SECRET=your-facebook-app-secret
+SOCIAL_AUTH_GITHUB_KEY=your-github-client-id
+SOCIAL_AUTH_GITHUB_SECRET=your-github-client-secret
+SOCIAL_AUTH_TWITTER_KEY=your-twitter-api-key
+SOCIAL_AUTH_TWITTER_SECRET=your-twitter-api-secret
+SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY=your-linkedin-client-id
+SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET=your-linkedin-client-secret
+```
+
+### Social Auth Endpoints
+- `/auth/login/<provider>/` — Redirect to provider (browser)
+- `/auth/complete/<provider>/` — Provider callback (browser)
+- `/auth/` — Social auth endpoints (see [social-auth-app-django docs](https://python-social-auth.readthedocs.io/en/latest/configuration/django.html#urls))
+
+**Providers:**
+- `google-oauth2`
+- `facebook`
+- `github`
+- `twitter`
+- `linkedin-oauth2`
+
+Example login URL: `/auth/login/google-oauth2/`
+
+See the [official docs](https://python-social-auth.readthedocs.io/en/latest/backends/index.html) for provider-specific setup and callback URLs.

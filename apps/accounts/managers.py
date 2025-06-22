@@ -10,20 +10,33 @@ class CustomUserManager(BaseUserManager):
         except ValidationError:
             raise ValueError(_("You must provide a valid email address"))
 
-    def create_user(self, username, first_name, last_name, email, password, user_type='student', **extra_fields):
-        if not username:
-            raise ValueError(_("Users must submit a username"))
-        if not first_name:
-            raise ValueError(_("Users must submit a first name"))
-        if not last_name:
-            raise ValueError(_("Users must submit a last name"))
-        if not user_type:
-            raise ValueError(_("Users must submit a user type"))
-        if not email:
+    def create_user(self, username=None, first_name=None, last_name=None, email=None, password=None, user_type='student', **extra_fields):
+        if email is None:
             raise ValueError(_("Base User Account: An email address is required"))
-        
         email = self.normalize_email(email).lower()
         self.email_validator(email)
+
+        # If called from normal signup/tests, require all fields
+        if username is None:
+            raise ValueError(_("Users must submit a username"))
+        if first_name is None:
+            raise ValueError(_("Users must submit a first name"))
+        if last_name is None:
+            raise ValueError(_("Users must submit a last name"))
+        if user_type is None:
+            raise ValueError(_("Users must submit a user type"))
+
+        # If called from social-auth, auto-generate missing fields (they will be empty string, not None)
+        if not username:
+            username = email.split('@')[0]
+        if not first_name:
+            first_name = ''
+        if not last_name:
+            last_name = ''
+        if not user_type:
+            user_type = 'student'
+        if not password:
+            password = self.make_random_password()
 
         user = self.model(
             username=username,
