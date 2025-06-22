@@ -29,8 +29,9 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    'apps.accounts',  # our custom user app
+    'apps.accounts',
     'apps.profiles',
+    'apps.courses',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

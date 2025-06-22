@@ -64,3 +64,15 @@ jobs:
 
       - name: Run tests
         run: pytest
+
+      - name: Run code coverage
+        run: |
+          pip install coverage
+          coverage run -m pytest
+          coverage report
+
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
