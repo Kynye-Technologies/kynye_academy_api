@@ -1,23 +1,24 @@
 # Kynye Academy API
 
 ## Description
-Backend API for Kynye Academy, built with Django REST Framework, featuring a custom user model, hierarchical expertise, JWT/Djoser/social authentication, and robust test-driven development.
+Backend API for Kynye Academy, built with Django REST Framework. Features include a custom user model, hierarchical expertise, JWT/Djoser/social authentication, robust test-driven development, and a full analytics/data processing pipeline with background task support.
 
-## Features
-- Custom user model (email login, instructor/student types)
-- JWT Authentication (SimpleJWT) & Djoser endpoints
-- Social authentication (Google, Facebook, etc.)
-- Hierarchical expertise structure (MainExpertise > Category > Specialization > Course)
-- Instructor and student profiles with permissions
-- Courses app with full CRUD and filtering
-- API Documentation (Swagger/ReDoc)
-- CORS support
-- Environment variables configuration
-- Production-ready settings
-- Static files served with WhiteNoise
-- PostgreSQL (with SQLite fallback for local/testing)
-- Robust tests (pytest, factory_boy)
-- GitHub Actions CI/CD with coverage reporting
+## Main Features
+- **Custom user model** (email login, instructor/student types)
+- **JWT Authentication** (SimpleJWT) & Djoser endpoints
+- **Social authentication** (Google, Facebook, GitHub, Twitter, LinkedIn)
+- **Profiles app:** Instructor/Student profiles, hierarchical expertise, signals, custom permissions
+- **Courses app:** Hierarchical models (MainExpertise, Category, Specialization, Course), CRUD, filtering
+- **Analytics app:**
+  - File upload API for CSV data (background processing with Celery)
+  - Background task processing with Celery & Redis
+  - Data processing with pandas (row/column count, column names, validation)
+  - Task status/result endpoint for background jobs
+  - Django management command (CLI tool) for CSV analytics
+  - Pytest tests for Celery tasks and CLI tool
+  - API versioning (`/api/v1/analytics/`)
+  - Swagger/OpenAPI documentation for all endpoints
+- **Project structure & best practices:** Modular apps, environment-based settings, .env, CORS, static/media, PostgreSQL/SQLite, robust tests, CI/CD, code quality tools
 
 ## Requirements
 - Python 3.11+
@@ -74,6 +75,7 @@ python manage.py runserver
 ## Main Endpoints
 - `/profiles/` — Instructor and student profiles
 - `/courses/` — Courses CRUD, filtering by expertise/category/specialization
+- `/api/v1/analytics/` — Analytics file upload and processing
 
 ## Usage Examples
 
@@ -141,6 +143,22 @@ Authorization: JWT <access-token>
 GET /courses/1/
 ```
 
+### Analytics
+#### Upload CSV File
+```bash
+POST /api/v1/analytics/upload/
+Authorization: JWT <access-token>
+Content-Type: multipart/form-data
+
+file=@/path/to/your/file.csv
+```
+
+#### Get Task Status
+```bash
+GET /api/v1/analytics/task/<task_id>/
+Authorization: JWT <access-token>
+```
+
 ## API Endpoints Overview
 
 | Endpoint                | Methods | Description                                 |
@@ -157,6 +175,8 @@ GET /courses/1/
 | /courses/<id>/         | GET     | Retrieve a course by ID                     |
 | /courses/<id>/         | PATCH   | Update a course (instructor only)           |
 | /courses/<id>/         | DELETE  | Delete a course (instructor only)           |
+| /api/v1/analytics/     | POST    | Upload CSV file for analytics                |
+| /api/v1/analytics/task/| GET     | Get status of a background task             |
 
 ## Project Structure
 ```
@@ -164,7 +184,8 @@ kynye_academy_api/
 ├── apps/
 │   ├── accounts/        # Custom user model, registration, auth
 │   ├── profiles/        # Instructor/Student profiles, signals, permissions
-│   └── courses/         # Hierarchical expertise, categories, courses
+│   ├── courses/         # Hierarchical expertise, categories, courses
+│   └── analytics/       # CSV analytics, background tasks, data processing
 ├── core/                # Project configuration, settings, urls
 ├── static/              # Static files
 ├── media/               # User uploaded files
